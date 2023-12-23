@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
 from .forms import SignUpForm
-from .models import Room
+from .models import Room, Message
 
 # Create your views here.
 
@@ -38,5 +38,6 @@ def rooms(request):
 @login_required
 def room(request, slug):
     room = Room.objects.get(slug=slug)
+    messages = Message.objects.filter(room=room)[:15]
     
-    return render(request, 'core/room.html', {'room': room})
+    return render(request, 'core/room.html', {'room': room, 'messages':messages})
