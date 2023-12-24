@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
+from nltk.tag import pos_tag
+from nltk.tokenize import RegexpTokenizer
+
 from .models import Room, Message
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -31,8 +34,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = data['message']
         username = data['username']
         room = data['room']
+        
+        tokenizer = RegexpTokenizer(r'\w+')
+        tagged = pos_tag(tokenizer.tokenize(message))
+        #figure of speech
+        fos = '{' + ', '.join([f'{word}: {pos}' for word, pos in tagged]) + '}'
 
-        await self.save_message(username, room, message)
+        await self.save_message(username, room, message, fos)
 
         #send recieved message to room group
         await self.channel_layer.group_send(
@@ -40,6 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message,
+                'fos': fos,
                 'username': username,
                 'room': room
             }
@@ -50,17 +59,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = event['message']
         username = event['username']
         room = event['room']
+        fos = event['fos']
 
         #send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
+            'fos': fos,
             'username': username,
             'room': room
         }))
     
     @sync_to_async
-    def save_message(self, username, room, message):
+    def save_message(self, username, room, message, fos):
         user = User.objects.get(username=username)
         room = Room.objects.get(slug=room)
         
-        Message.objects.create(user=user, room=room, content=message)
+        Message.objects.create(user=user, room=room, content=message, fos=fos)
