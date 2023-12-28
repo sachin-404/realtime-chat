@@ -1,4 +1,6 @@
 import json
+import django
+django.setup()
 
 # from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncWebsocketConsumer
