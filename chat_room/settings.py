@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-1miw4xfz#b6iq!)^3elv0j^vv79pkytr1qm5*0lun3659%hj8d
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['.herokuapp.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.herokuapp.com']
 
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
